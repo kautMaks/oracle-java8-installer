@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+  purge|remove|abort-install)
+    rm -rf "/usr/lib/jvm/java-8-oracle"
+    rm -rf "/var/cache/oracle-jdk8-installer"
+    rm -rf "/usr/lib/oracle-jdk8-installer-unpackdir"
+    rm -rf "/usr/lib/jvm/.java-8-oracle.jinfo"
+    ;;
+esac
+
+# Automatically added by dh_installdebconf
+if [ "$1" = purge ] && [ -e /usr/share/debconf/confmodule ]; then
+	. /usr/share/debconf/confmodule
+	db_purge
+fi
+# End automatically added section
+
+
+exit 0
+
+# vim: ts=2 sw=2

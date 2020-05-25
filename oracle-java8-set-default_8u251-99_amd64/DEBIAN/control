@@ -1,0 +1,14 @@
+Package: oracle-java8-set-default
+Source: oracle-java8-installer
+Version: 8u131-1~webupd8~2
+Architecture: all
+Maintainer: Alin Andrei <webupd8@gmail.com>
+Installed-Size: 20
+Pre-Depends: oracle-java8-installer
+Conflicts: oracle-java6-set-default, oracle-java7-set-default, oracle-java9-set-default
+Replaces: oracle-java6-set-default, oracle-java7-set-default, oracle-java9-set-default
+Section: non-free/java
+Priority: optional
+Homepage: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+Description: Set Oracle JDK 8 as default Java
+ This package sets Java 8 as default (JAVA_HOME, PATH, etc.)
