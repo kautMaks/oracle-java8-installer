@@ -31,7 +31,7 @@ for JAVA_VERSION_OLD in `seq 1 250`; do #must be modified for each release
   FILENAMES_OLD="jdk-8-ea-bin-b${JAVA_VERSION_OLD}-linux-${dld}-*.tar.gz $FILENAMES_OLD" #old name
   FILENAMES_OLD_N="jdk-8-fcs-bin-b${JAVA_VERSION_OLD}-linux-${dld}*.tar.gz $FILENAMES_OLD_N" #new name
   FILENAMES_OLD_NA="jdk-8-fcs-b${JAVA_VERSION_OLD}-linux-${dld}*.tar.gz $FILENAMES_OLD_NA" #arm
-  FILENAMES_OLD_VER="jdk-8u${JAVA_VERSION_OLD2}-linux-${dld}*.tar.gz $FILENAMES_OLD_VER"
+  FILENAMES_OLD_VER="jdk-8u${JAVA_VERSION_OLD_VER}-linux-${dld}*.tar.gz $FILENAMES_OLD_VER"
 done
 
 J_INSTALL_DIR=/usr/lib/jvm/java-8-oracle
