@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 #jinstall - Command line script to easily add new java directories to
 #'alternatives'. This sets the java as default, and you can switch your
 #default java with update-java-alternatives
@@ -9,72 +9,29 @@
 #Tested on Ubuntu Oneiric; should require few changes for other modern Unix systems
 #Currently tested only with JDK, not JRE.
 # Not fully internationalized, including japanese man pages
+#
+#Copyright 2020 Maksim Kaut <maksimkaut92@gmail.com>
 
 set -e
 
 VER='0.6alpha'
 
-case $(dpkg --print-architecture) in
-'i386'|'i586'|'i686') arch=i386; dld=i586;
-  SHA256SUM_TGZ="0069a2b1b1cddbefa45f1ff12933fca3b114b6544d536ec0e2d4861a830d7154" #must be modified for each release
-  ;; 
-'amd64'  ) arch=amd64; dld=x64;
-  SHA256SUM_TGZ="62b215bdfb48bace523723cdbb2157c665e6a25429c73828a32f00e587301236" #must be modified for each release 
-  ;; 
-arm*      )
-  arch=arm
-	if [ `uname -m` = "armv7l" ] || [ `uname -m` = "armv6l" ]; then
-		if [ -x /usr/bin/readelf ] ; then
-			HARDFLOAT=`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`
-			if [ -z "$HARDFLOAT" ]; then
-				# Softfloat
-				echo "Oracle Java 8 doesn't support ARM v6/v7 softfloat ABI."
-				#dld='arm-vfp-sflt'
-				#SHA256SUM_TGZ="5026a8f2eea8d350ea6ed7cfb8496b571ec9c1e43db82750a3ca8dc02569076e"
-			else
-				# Hardfloat
-				dld='arm32-vfp-hflt'
-				SHA256SUM_TGZ="4d2677261715e9f0e44972517cf22ae40c69ad4dd1e4c34c88127462b13d4949" #must be modified for each release
-			fi
-		fi
-	elif [ `uname -m` = "armv8l" ] || [ `uname -m` = "arm64" ] || [ `uname -m` = "aarch64" ]; then
-		dld='arm64-vfp-hflt'
-		SHA256SUM_TGZ="8f1d59e35cbea789219f9908d666027ab9015abd8f43999d28d21b43d84c77c2" #must be modified for each release
-	else
-		echo "Oracle JDK 8 only supports ARM v6/v7/v8 hardfloat."
-		arch=''
-	fi
-	;;
-*         )
-    echo "Please report to author unsupported platform '`uname -m`'.";
-    echo "Proceeding without web browser plugin support";
-    arch='';
-esac
+arch=amd64
+dld=x64
+SHA256SUM_TGZ="777a8d689e863275a647ae52cb30fd90022a3af268f34fc5b9867ce32f1b374e" #must be modified for each release
 
 ########Variables
 
-if [ ! $arch = "arm" ]; then
-	JAVA_VERSION=8u131 #must be modified for each release jdk-8u5-linux-x64.tar.gz
-	J_DIR=jdk1.8.0_131 #must be modified for each release
-	FILENAME=jdk-${JAVA_VERSION}-linux-${dld}.tar.gz
-	PARTNER_URL=http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/$FILENAME #must be modified for each release
-	for JAVA_VERSION_OLD2 in `seq 1 130`; do #must be modified for each release
-	   FILENAMES_OLD2="jdk-8u${JAVA_VERSION_OLD2}-linux-${dld}*.tar.gz $FILENAMES_OLD2"
-	done
-else
-	JAVA_VERSION=8u131 #must be modified for each release jdk-8-linux-arm-vfp-hflt.tar.gz
-	J_DIR=jdk1.8.0_131 #must be modified for each release
-	FILENAME=jdk-${JAVA_VERSION}-linux-${dld}.tar.gz
-	PARTNER_URL=http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/$FILENAME #must be modified for each release
-	for JAVA_VERSION_OLD1 in `seq 1 130`; do #must be modified for each release
-		FILENAMES_OLD1="jdk-8u${JAVA_VERSION_OLD1}-linux-${dld}*.tar.gz $FILENAMES_OLD1 jdk-8-*.tar.gz"
-	done
-fi
+JAVA_VERSION=8u251 #must be modified for each release jdk-8u5-linux-x64.tar.gz
+J_DIR=jdk1.8.0_251 #must be modified for each release
+FILENAME=jdk-${JAVA_VERSION}-linux-${dld}.tar.gz
+PARTNER_URL=http://packages.mirohost.net/java/$FILENAME
 
-for JAVA_VERSION_OLD in `seq 53 132`; do #must be modified for each release
+for JAVA_VERSION_OLD in `seq 1 250`; do #must be modified for each release
   FILENAMES_OLD="jdk-8-ea-bin-b${JAVA_VERSION_OLD}-linux-${dld}-*.tar.gz $FILENAMES_OLD" #old name
   FILENAMES_OLD_N="jdk-8-fcs-bin-b${JAVA_VERSION_OLD}-linux-${dld}*.tar.gz $FILENAMES_OLD_N" #new name
   FILENAMES_OLD_NA="jdk-8-fcs-b${JAVA_VERSION_OLD}-linux-${dld}*.tar.gz $FILENAMES_OLD_NA" #arm
+  FILENAMES_OLD_VER="jdk-8u${JAVA_VERSION_OLD2}-linux-${dld}*.tar.gz $FILENAMES_OLD_VER"
 done
 
 J_INSTALL_DIR=/usr/lib/jvm/java-8-oracle
@@ -85,10 +42,6 @@ mkdir -p /usr/lib/jvm
 mkdir -p /usr/lib/oracle-jdk8-installer-unpackdir
 #without this, an error is displayed if the folder doesn't exist:
 mkdir -p /usr/lib/mozilla/plugins
-if [ $arch = "arm" ]; then
-	#apparently this dir doesn't exist on some arm machines
-	mkdir -p /usr/share/man/man1
-fi
 
 #############
 
@@ -172,13 +125,10 @@ fp_download_and_unpack() {
 	# Removing outdated cached downloads
 	echo "Removing outdated cached downloads..."
 	rm -vf $FILENAMES_OLD
-	rm -vf $FILENAMES_OLD1
-	rm -vf $FILENAMES_OLD2
 	rm -vf $FILENAMES_OLD_N
 	rm -vf $FILENAMES_OLD_NA
-	if [ ! $arch = "arm" ]; then
-		rm -vf jdk-8-linux* #temp
-	fi
+	rm -vf $FILENAMES_OLD_VER
+	rm -vf jdk-8-linux* #temp
 
 	# verify SHA256 checksum of (copied or downloaded) tarball
 	rm -rf jdk*/
@@ -204,12 +154,9 @@ mv $J_DIR java-8-oracle
 rm -rf /usr/lib/jvm/java-8-oracle
 cp -rf java-8-oracle /usr/lib/jvm/
 
-# There's no javaws on arm
-if [ ! $arch = "arm" ]; then
-	# Install javaws-wrapper.sh
-	mv $J_INSTALL_DIR/jre/bin/javaws $J_INSTALL_DIR/jre/bin/javaws.real
-	install -m 755 javaws-wrapper.sh $J_INSTALL_DIR/jre/bin/javaws
-fi
+# Install javaws-wrapper.sh
+mv $J_INSTALL_DIR/jre/bin/javaws $J_INSTALL_DIR/jre/bin/javaws.real
+install -m 755 javaws-wrapper.sh $J_INSTALL_DIR/jre/bin/javaws
 
 # Install jar.binfmt
 install -m 755 jar.binfmt $J_INSTALL_DIR/jre/lib/jar.binfmt
@@ -257,19 +204,13 @@ for f in $J_INSTALL_DIR/jre/bin/*; do
     name=`basename $f`;
     if [ ! -f "/usr/bin/$name" -o -L "/usr/bin/$name" ]; then  #some files, like jvisualvm might not be links
         if [ -f "$J_INSTALL_DIR/man/man1/$name.1.gz" ]; then
-					if [ ! $arch = "arm" ]; then
             update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/jre/bin/$name $PRIORITY --slave /usr/share/man/man1/$name.1.gz $name.1.gz $J_INSTALL_DIR/man/man1/$name.1.gz
             echo "jre $name $J_INSTALL_DIR/jre/bin/$name" >> /usr/lib/jvm/.java-8-oracle.jinfo
-					else
-						# There's no javaws, jvisualvm or jmc on arm
-						[ ! $name = "javaws" ] && [ ! $name = "jvisualvm" ] && [ ! $name = "jmc" ] && update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/jre/bin/$name $PRIORITY --slave /usr/share/man/man1/$name.1.gz $name.1.gz $J_INSTALL_DIR/man/man1/$name.1.gz
-						[ ! $name = "javaws" ] && [ ! $name = "jvisualvm" ] && [ ! $name = "jmc" ] && echo "jre $name $J_INSTALL_DIR/jre/bin/$name" >> /usr/lib/jvm/.java-8-oracle.jinfo
-					fi
-         else #no man pages available
-            # [ ! $name = "javaws.real" ] = skip javaws.real     
+        else #no man pages available
+            # [ ! $name = "javaws.real" ] = skip javaws.real
             [ ! $name = "javaws.real" ] && update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/jre/bin/$name $PRIORITY
             [ ! $name = "javaws.real" ] && echo "jre $name $J_INSTALL_DIR/jre/bin/$name" >> /usr/lib/jvm/.java-8-oracle.jinfo
-         fi
+        fi
     fi
 done
 
@@ -288,14 +229,8 @@ if [ -d "$J_INSTALL_DIR/man/man1" ];then
                 name=`basename $f .1`;          #handle any legacy uncompressed pages
             fi
           		if [ ! -e $J_INSTALL_DIR/jre/bin/$name ]; then #don't link already linked JRE files
-								if [ ! $arch = "arm" ]; then
               		update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/bin/$name $PRIORITY --slave /usr/share/man/man1/$name.1.gz $name.1.gz $J_INSTALL_DIR/man/man1/$name.1.gz
               		echo "jdk $name $J_INSTALL_DIR/bin/$name" >> /usr/lib/jvm/.java-8-oracle.jinfo
-								else
-									# There's no javaws, jvisualvm or jmc on arm
-									[ ! $name = "javaws" ] && [ ! $name = "jvisualvm" ] && [ ! $name = "jmc" ] && update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/bin/$name $PRIORITY --slave /usr/share/man/man1/$name.1.gz $name.1.gz $J_INSTALL_DIR/man/man1/$name.1.gz
-									[ ! $name = "javaws" ] && [ ! $name = "jvisualvm" ] && [ ! $name = "jmc" ] && echo "jdk $name $J_INSTALL_DIR/bin/$name" >> /usr/lib/jvm/.java-8-oracle.jinfo
-								fi
           		fi
         fi
     done
@@ -310,12 +245,6 @@ else  #no man pages available
             fi
         fi
     done
-fi
-
-# Hide javaws and jvisualvm desktop files on arm since these files don't exist on this architecture
-if [ $arch = "arm" ]; then
-echo "NoDisplay=true" >> /usr/share/applications/JB-javaws-jdk8.desktop
-echo "NoDisplay=true" >> /usr/share/applications/JB-jvisualvm-jdk8.desktop
 fi
 
 # Use cacerts form ca-certificates-java if it's installed:
@@ -349,7 +278,6 @@ if which update-binfmts >/dev/null && [ -r /usr/share/binfmts/jar ]; then
 fi
 
 # Install Firefox (and compatible) plugin. $arch will be empty for unknown platform
-# No plugin for arm architecture yet
 [ -f $J_INSTALL_DIR/jre/lib/$arch/libnpjp2.so ] && \
 	update-alternatives --install /usr/lib/mozilla/plugins/libjavaplugin.so mozilla-javaplugin.so $J_INSTALL_DIR/jre/lib/$arch/libnpjp2.so $PRIORITY && \
 	echo "plugin mozilla-javaplugin.so $J_INSTALL_DIR/jre/lib/$arch/libnpjp2.so" >> /usr/lib/jvm/.java-8-oracle.jinfo && \

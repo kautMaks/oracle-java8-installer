@@ -1,7 +1,7 @@
 Package: oracle-java8-installer
-Version: 8u131-1~webupd8~2
-Architecture: all
-Maintainer: Alin Andrei <webupd8@gmail.com>
+Version: 8u251-99
+Architecture: amd64
+Maintainer: Maksim Kaut <maksimkaut92@gmail.com>
 Installed-Size: 115
 Pre-Depends: wget, binutils, debconf (>= 0.5) | debconf-2.0
 Depends: java-common (>= 0.24), locales

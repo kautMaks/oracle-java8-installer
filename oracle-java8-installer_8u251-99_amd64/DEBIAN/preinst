@@ -23,9 +23,9 @@ STATE=1
 while true; do
     case "$STATE" in
     0)  # ensure going back from license presentment is harmless
-        STATE=1 
+        STATE=1
         continue
-        ;;   
+        ;;
     1)  # present license
         db_fset shared/present-$license seen false
         if ! db_input critical shared/present-$license ; then
@@ -37,7 +37,7 @@ while true; do
             errmsg "$license agree question could not be asked"
 	    exit 2
         fi
-        ;;      
+        ;;
     2)  # determine users' choice
         db_get shared/accepted-$license
         if [ "$RET" = "true" ]; then
@@ -46,15 +46,15 @@ while true; do
         fi
         # error on decline license (give user chance to back up)
         db_input critical shared/error-$license
-        ;;      
+        ;;
     3)  # user has confirmed declining license
         echo "user did not accept the $license license" >&2
         exit 1
-        ;;   
+        ;;
     *)  # unknown state
         echo "$license license state unknown: $STATE" >&2
         exit 2
-        ;;   
+        ;;
     esac
     if db_go; then
         STATE=$(($STATE + 1))
@@ -62,7 +62,7 @@ while true; do
         STATE=$(($STATE - 1))
     fi
 done
- 
+
 
 
 # proper exit (0 or 1) above
